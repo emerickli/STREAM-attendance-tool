@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0b0624" />
+    <title>STREAM Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css?v=7" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <div class="logo-mark">
+          <img src="assets/logo.png" alt="STREAM Academy" />
+        </div>
+        <div class="event-shell">
+          <select class="event-select" id="eventSelect" aria-label="Event">
+            <option value="">Event</option>
+          </select>
+        </div>
+      </header>
+      <main class="stage">
+        <div class="camera-frame" id="cameraFrame">
+          <div id="reader"></div>
+          <div class="viewfinder" aria-hidden="true">
+            <div class="viewfinder-box">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <div class="debug-bar">
+            <button type="button" id="debugOk">MEMBER_106902</button>
+            <button type="button" id="debugBad">MEMBER_000000</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="create-panel" id="createPanel" hidden>
+      <p class="create-title">New event</p>
+      <input
+        class="create-input"
+        id="createEventName"
+        type="text"
+        maxlength="80"
+        placeholder="Event name"
+        autocomplete="off"
+      />
+      <button class="create-save" id="createEventSave" type="button">Create</button>
+      <button class="create-cancel" id="createEventCancel" type="button">Cancel</button>
+    </div>
+
+    <div class="overlay" id="overlay" hidden>
+      <div class="overlay-copy">
+        <p class="overlay-title" id="overlayTitle"></p>
+        <p class="overlay-detail" id="overlayDetail"></p>
+      </div>
+      <button class="retry" id="retry" type="button">Try Again</button>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="js/config.js?v=7"></script>
+    <script src="js/members.js?v=7"></script>
+    <script src="js/app.js?v=7"></script>
+  </body>
+</html>
