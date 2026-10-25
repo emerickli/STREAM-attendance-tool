@@ -2,21 +2,26 @@
   var EVENT_KEY = "STREAM_ACTIVE_EVENT";
   var SIGNED_PREFIX = "STREAM_SIGNED_";
   var LOCAL_EVENTS_KEY = "STREAM_LOCAL_EVENTS";
+  var DEBUG_KEY = "STREAM_DEBUG_SCANS";
   var NEW_EVENT = "__new__";
-  var RESET_MS = 3000;
+  var RESET_MS = 1250;
+  var SWAP_MS = 180;
   var select = document.getElementById("eventSelect");
   var frame = document.getElementById("cameraFrame");
   var overlay = document.getElementById("overlay");
   var overlayTitle = document.getElementById("overlayTitle");
   var overlayDetail = document.getElementById("overlayDetail");
-  var retry = document.getElementById("retry");
   var createPanel = document.getElementById("createPanel");
   var createInput = document.getElementById("createEventName");
+  var settingsPanel = document.getElementById("settingsPanel");
+  var debugBar = document.getElementById("debugBar");
+  var debugToggle = document.getElementById("debugToggle");
   var lastEvent = "";
   var scanner = null;
   var scanning = false;
   var locked = false;
   var resetTimer = null;
+  var fadeTimer = null;
   var scriptUrl = (window.APP_CONFIG && window.APP_CONFIG.SCRIPT_URL) || "";
 
   function scriptReady() {
@@ -123,9 +128,9 @@
     return window.MEMBERS && window.MEMBERS[code];
   }
 
-  function showOverlay(kind, title, lines, autoReset) {
+  function paintOverlay(kind, title, lines, autoReset) {
     overlay.hidden = false;
-    overlay.className = "overlay is-open is-" + kind;
+    overlay.className = "overlay is-open is-fading is-" + kind;
     overlayTitle.textContent = title;
     overlayDetail.innerHTML = "";
     (lines || []).forEach(function (line) {
@@ -133,13 +138,41 @@
       span.textContent = line;
       overlayDetail.appendChild(span);
     });
-    if (autoReset) {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        overlay.classList.remove("is-fading");
+      });
+    });
+    if (autoReset !== false) {
       clearTimeout(resetTimer);
       resetTimer = setTimeout(hideOverlayAndResume, RESET_MS);
     }
   }
 
+  function showOverlay(kind, title, lines, autoReset) {
+    clearTimeout(fadeTimer);
+    clearTimeout(resetTimer);
+    if (overlay.classList.contains("is-open")) {
+      overlay.classList.add("is-fading");
+      fadeTimer = setTimeout(function () {
+        paintOverlay(kind, title, lines, autoReset);
+      }, SWAP_MS);
+      return;
+    }
+    paintOverlay(kind, title, lines, autoReset);
+  }
+
+  function showWait() {
+    clearTimeout(fadeTimer);
+    clearTimeout(resetTimer);
+    overlay.hidden = false;
+    overlay.className = "overlay is-open is-wait";
+    overlayTitle.textContent = "";
+    overlayDetail.innerHTML = "";
+  }
+
   function hideOverlay() {
+    clearTimeout(fadeTimer);
     overlay.className = "overlay";
     overlay.hidden = true;
     overlayTitle.textContent = "";
@@ -147,6 +180,7 @@
   }
 
   function hideOverlayAndResume() {
+    clearTimeout(resetTimer);
     hideOverlay();
     locked = false;
     startScanner();
@@ -188,18 +222,72 @@
       });
   }
 
-  function onScan(text) {
+  function frameFile() {
+    var video = document.querySelector("#reader video");
+    if (!video || !video.videoWidth) {
+      return Promise.resolve(null);
+    }
+    var canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0);
+    return new Promise(function (resolve) {
+      canvas.toBlob(
+        function (blob) {
+          if (!blob) {
+            resolve(null);
+            return;
+          }
+          resolve(new File([blob], "frame.jpg", { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        0.92
+      );
+    });
+  }
+
+  function decodeFile(file) {
+    if (!file) {
+      return Promise.resolve();
+    }
+    if (!scanner) {
+      scanner = new Html5Qrcode("reader", { verbose: false });
+    }
+    locked = true;
+    showWait();
+    return stopScanner()
+      .then(function () {
+        return scanner.scanFile(file, false);
+      })
+      .then(function (text) {
+        identify(text);
+      })
+      .catch(function () {
+        showOverlay("red", "Identifier could not be read.", []);
+      });
+  }
+
+  function forceScan() {
     if (locked) {
       return;
     }
-    locked = true;
-    stopScanner();
+    frameFile().then(function (file) {
+      if (file) {
+        decodeFile(file);
+        return;
+      }
+      document.getElementById("scanFile").click();
+    });
+  }
+
+  function identify(text) {
     var code = normalize(text);
     var member = memberFor(code);
     if (!member) {
-      showOverlay("red", "Identifier not recognized.", [], false);
+      showOverlay("red", "Identifier not recognized.", []);
       return;
     }
+    showWait();
     api({
       action: "checkIn",
       event: select.value,
@@ -226,20 +314,28 @@
           );
           return;
         }
-        showOverlay("red", "Could not save. Try again.", [], false);
+        showOverlay("red", "Could not save.", []);
       })
       .catch(function () {
         if (!scriptReady()) {
           showOverlay(
             "navy",
             "Welcome back, " + member.name + ".",
-            ["Grade: " + member.grade],
-            true
+            ["Grade: " + member.grade]
           );
           return;
         }
-        showOverlay("red", "Could not save. Try again.", [], false);
+        showOverlay("red", "Could not save.", []);
       });
+  }
+
+  function onScan(text) {
+    if (locked) {
+      return;
+    }
+    locked = true;
+    stopScanner();
+    identify(text);
   }
 
   function openCreatePanel() {
@@ -282,7 +378,7 @@
           return;
         }
         closeCreatePanel();
-        showOverlay("red", "Could not create that event.", [], false);
+        showOverlay("red", "Could not create that event.", []);
       });
   }
 
@@ -311,13 +407,55 @@
     if (event.key === "Enter") {
       submitNewEvent();
     }
-    if (event.key === "Escape") {
-      closeCreatePanel();
-    }
   });
 
-  retry.addEventListener("click", function () {
-    hideOverlayAndResume();
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") {
+      return;
+    }
+    closeCreatePanel();
+    closeSettings();
+  });
+
+  function debugEnabled() {
+    return localStorage.getItem(DEBUG_KEY) === "1";
+  }
+
+  function applyDebug() {
+    var on = debugEnabled();
+    debugToggle.checked = on;
+    debugBar.hidden = !on;
+  }
+
+  function openSettings() {
+    applyDebug();
+    settingsPanel.hidden = false;
+    settingsPanel.classList.add("is-open");
+  }
+
+  function closeSettings() {
+    settingsPanel.classList.remove("is-open");
+    settingsPanel.hidden = true;
+  }
+
+  document.getElementById("settingsBtn").addEventListener("click", openSettings);
+  document.getElementById("settingsClose").addEventListener("click", closeSettings);
+  debugToggle.addEventListener("change", function () {
+    if (debugToggle.checked) {
+      localStorage.setItem(DEBUG_KEY, "1");
+    } else {
+      localStorage.removeItem(DEBUG_KEY);
+    }
+    applyDebug();
+  });
+
+  document.getElementById("forceScan").addEventListener("click", forceScan);
+  document.getElementById("scanFile").addEventListener("change", function (event) {
+    var file = event.target.files && event.target.files[0];
+    event.target.value = "";
+    if (file) {
+      decodeFile(file);
+    }
   });
 
   document.getElementById("debugOk").addEventListener("click", function () {
@@ -327,5 +465,6 @@
     onScan("MEMBER_000000");
   });
 
+  applyDebug();
   loadEvents();
 })();

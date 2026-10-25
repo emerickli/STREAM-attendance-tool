@@ -1,13 +1,17 @@
 :root {
   --navy: #0b0624;
+  --navy-2: #151133;
+  --navy-3: #221d45;
+  --navy-4: #2c2654;
   --gold: #e8c547;
   --text: #f4eed4;
   --muted: rgba(244, 238, 212, 0.62);
-  --line: rgba(232, 197, 71, 0.45);
+  --line: rgba(255, 255, 255, 0.06);
   --green: #1a4d2e;
   --amber: #5a4a14;
   --red: #5c1d24;
   --fade: 260ms ease;
+  --swap: 180ms ease;
   --display: "Cormorant Garamond", "Times New Roman", serif;
   --ui: "Cinzel", "Palatino Linotype", serif;
 }
@@ -53,27 +57,30 @@ body {
   flex-shrink: 0;
 }
 
-.logo-mark {
-  position: relative;
+.gear {
   width: 64px;
   height: 64px;
   min-width: 64px;
-  min-height: 64px;
   flex: 0 0 64px;
-  border-radius: 50%;
-  overflow: hidden;
   align-self: center;
-  background: #07041a;
+  border: 0;
+  border-radius: 50%;
+  background: var(--navy-2);
+  color: var(--muted);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.logo-mark img {
-  position: absolute;
-  width: 124%;
-  height: 124%;
-  left: 50%;
-  top: 49%;
-  transform: translate(-50%, -50%);
-  object-fit: cover;
+.gear svg {
+  width: 28px;
+  height: 28px;
+}
+
+.gear:focus {
+  outline: none;
+  background: var(--navy-3);
 }
 
 .event-shell {
@@ -88,8 +95,8 @@ body {
     14px 100%,
     0 50%
   );
-  background: var(--line);
-  padding: 1px;
+  background: var(--navy-3);
+  padding: 0;
 }
 
 .event-select {
@@ -100,7 +107,7 @@ body {
   -webkit-appearance: none;
   border: 0;
   border-radius: 0;
-  background-color: var(--navy);
+  background-color: var(--navy-2);
   color: var(--text);
   font-size: 1.05rem;
   font-weight: 400;
@@ -114,8 +121,8 @@ body {
     14px 100%,
     0 50%
   );
-  background-image: linear-gradient(45deg, transparent 50%, var(--gold) 50%),
-    linear-gradient(135deg, var(--gold) 50%, transparent 50%);
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
   background-position: calc(100% - 28px) calc(50% - 3px),
     calc(100% - 22px) calc(50% - 3px);
   background-size: 6px 6px, 6px 6px;
@@ -127,7 +134,7 @@ body {
 }
 
 .event-shell:focus-within {
-  background: var(--gold);
+  background: var(--navy-4);
 }
 
 .event-select option {
@@ -145,11 +152,11 @@ body {
 .camera-frame {
   flex: 1;
   min-height: 0;
-  border: 1px solid var(--line);
+  border: 0;
   border-radius: 2px;
   overflow: hidden;
   position: relative;
-  background: rgba(232, 197, 71, 0.03);
+  background: var(--navy-2);
 }
 
 .viewfinder {
@@ -172,7 +179,7 @@ body {
   position: absolute;
   width: 32px;
   height: 32px;
-  border: 0 solid var(--gold);
+  border: 0 solid rgba(244, 238, 212, 0.45);
 }
 
 .viewfinder-box span:nth-child(1) {
@@ -222,21 +229,48 @@ body {
   opacity: 1;
 }
 
-.debug-bar {
+.scan-actions {
   position: absolute;
   left: 12px;
   right: 12px;
   bottom: 12px;
   z-index: 6;
   display: flex;
+  flex-direction: column;
   gap: 8px;
+}
+
+.debug-bar[hidden] {
+  display: none;
+}
+
+.debug-bar {
+  display: flex;
+  gap: 8px;
+}
+
+.force-scan {
+  min-height: 44px;
+  border: 0;
+  background: var(--navy-3);
+  color: var(--text);
+  font-family: var(--ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  padding: 10px 12px;
+}
+
+.force-scan:focus {
+  outline: none;
+  background: var(--navy-4);
 }
 
 .debug-bar button {
   flex: 1;
   min-height: 36px;
-  border: 1px solid var(--line);
-  background: rgba(11, 6, 36, 0.72);
+  border: 0;
+  background: var(--navy-3);
   color: var(--muted);
   font-size: 0.62rem;
   font-weight: 400;
@@ -245,14 +279,18 @@ body {
 }
 
 .debug-bar button:focus {
-  outline: 1px solid var(--gold);
+  outline: none;
+  background: var(--navy-4);
 }
 
+.settings-panel[hidden],
 .create-panel[hidden] {
   display: flex;
 }
 
+.settings-panel,
 .create-panel {
+
   position: fixed;
   inset: 0;
   display: flex;
@@ -268,9 +306,29 @@ body {
   z-index: 12;
 }
 
+.settings-panel.is-open,
 .create-panel.is-open {
   opacity: 1;
   pointer-events: auto;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(420px, 100%);
+  min-height: 56px;
+  border: 0;
+  background: var(--navy-2);
+  padding: 0 18px;
+  font-size: 0.95rem;
+  letter-spacing: 0.14em;
+}
+
+.setting-row input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--gold);
 }
 
 .create-title {
@@ -283,8 +341,8 @@ body {
 .create-input {
   width: min(420px, 100%);
   min-height: 56px;
-  border: 1px solid var(--line);
-  background: transparent;
+  border: 0;
+  background: var(--navy-2);
   color: var(--text);
   font-family: var(--ui);
   font-size: 1rem;
@@ -294,7 +352,8 @@ body {
 }
 
 .create-input:focus {
-  outline: 1px solid var(--gold);
+  outline: none;
+  background: var(--navy-3);
 }
 
 .create-save,
@@ -309,9 +368,9 @@ body {
 }
 
 .create-save {
-  border: 1px solid var(--gold);
-  background: transparent;
-  color: var(--gold);
+  border: 0;
+  background: var(--navy-3);
+  color: var(--text);
 }
 
 .create-cancel {
@@ -366,6 +425,37 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  opacity: 1;
+  transition: opacity var(--swap);
+}
+
+.overlay.is-fading .overlay-copy {
+  opacity: 0;
+}
+
+.wait-mark {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border: 1.5px solid rgba(232, 197, 71, 0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: wait-spin 0.9s linear infinite;
+}
+
+.overlay.is-wait .wait-mark {
+  display: block;
+}
+
+.overlay.is-wait .overlay-title,
+.overlay.is-wait .overlay-detail {
+  display: none;
+}
+
+@keyframes wait-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .overlay-title {
@@ -399,41 +489,22 @@ body {
   display: block;
 }
 
-.retry {
-  display: none;
-  flex-shrink: 0;
-  width: min(420px, 100%);
-  min-height: 52px;
-  border: 1px solid var(--gold);
-  background: transparent;
-  color: var(--gold);
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: none;
-  padding: 12px 20px;
-}
-
-.overlay.is-red.is-open .retry {
-  display: block;
-}
-
-.retry:focus {
-  outline: 1px solid var(--gold);
-}
-
 @media (max-width: 600px) {
   .header {
     padding: 14px 16px 10px;
     gap: 12px;
   }
 
-  .logo-mark {
+  .gear {
     width: 52px;
     height: 52px;
     min-width: 52px;
-    min-height: 52px;
     flex-basis: 52px;
+  }
+
+  .gear svg {
+    width: 22px;
+    height: 22px;
   }
 
   .event-select {

@@ -14,14 +14,28 @@
       href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:wght@500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="css/styles.css?v=7" />
+    <link rel="stylesheet" href="css/styles.css?v=15" />
   </head>
   <body>
     <div class="app">
       <header class="header">
-        <div class="logo-mark">
-          <img src="assets/logo.png" alt="STREAM Academy" />
-        </div>
+        <button class="gear" id="settingsBtn" type="button" aria-label="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z"
+            />
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linejoin="round"
+              d="M19.4 13a7.6 7.6 0 0 0 .1-2l2-1.5-2-3.4-2.4 1a7.7 7.7 0 0 0-1.7-1L15 3.1h-6l-.4 2.9a7.7 7.7 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.5a7.6 7.6 0 0 0 .1 2l-2 1.5 2 3.4 2.4-1a7.7 7.7 0 0 0 1.7 1l.4 2.9h6l.4-2.9a7.7 7.7 0 0 0 1.7-1l2.4 1 2-3.4-2-1.5z"
+            />
+          </svg>
+        </button>
         <div class="event-shell">
           <select class="event-select" id="eventSelect" aria-label="Event">
             <option value="">Event</option>
@@ -39,12 +53,30 @@
               <span></span>
             </div>
           </div>
-          <div class="debug-bar">
-            <button type="button" id="debugOk">MEMBER_106902</button>
-            <button type="button" id="debugBad">MEMBER_000000</button>
+          <div class="scan-actions">
+            <div class="debug-bar" id="debugBar" hidden>
+              <button type="button" id="debugOk">MEMBER_106902</button>
+              <button type="button" id="debugBad">MEMBER_000000</button>
+            </div>
+            <button class="force-scan" id="forceScan" type="button">Scan</button>
+            <input
+              id="scanFile"
+              type="file"
+              accept="image/*"
+              hidden
+            />
           </div>
         </div>
       </main>
+    </div>
+
+    <div class="settings-panel" id="settingsPanel" hidden>
+      <p class="create-title">Settings</p>
+      <label class="setting-row">
+        <span>Debug scans</span>
+        <input type="checkbox" id="debugToggle" />
+      </label>
+      <button class="create-cancel" id="settingsClose" type="button">Close</button>
     </div>
 
     <div class="create-panel" id="createPanel" hidden>
@@ -63,15 +95,15 @@
 
     <div class="overlay" id="overlay" hidden>
       <div class="overlay-copy">
+        <div class="wait-mark" aria-hidden="true"></div>
         <p class="overlay-title" id="overlayTitle"></p>
         <p class="overlay-detail" id="overlayDetail"></p>
       </div>
-      <button class="retry" id="retry" type="button">Try Again</button>
     </div>
 
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script src="js/config.js?v=7"></script>
-    <script src="js/members.js?v=7"></script>
-    <script src="js/app.js?v=7"></script>
+    <script src="js/config.js?v=9"></script>
+    <script src="js/members.js?v=9"></script>
+    <script src="js/app.js?v=14"></script>
   </body>
 </html>
