@@ -4,7 +4,7 @@
   var LOCAL_EVENTS_KEY = "STREAM_LOCAL_EVENTS";
   var DEBUG_KEY = "STREAM_DEBUG_SCANS";
   var NEW_EVENT = "__new__";
-  var RESET_MS = 1250;
+  var RESET_MS = 2250;
   var SWAP_MS = 180;
   var select = document.getElementById("eventSelect");
   var frame = document.getElementById("cameraFrame");
@@ -119,9 +119,11 @@
   }
 
   function normalize(text) {
-    return String(text || "")
-      .trim()
-      .toUpperCase();
+    var code = String(text || "").trim().toUpperCase();
+    if (code.indexOf("MEMBER_") === 0) {
+      code = code.slice(7);
+    }
+    return code;
   }
 
   function memberFor(code) {
@@ -220,64 +222,6 @@
         scanning = false;
         frame.classList.remove("is-on");
       });
-  }
-
-  function frameFile() {
-    var video = document.querySelector("#reader video");
-    if (!video || !video.videoWidth) {
-      return Promise.resolve(null);
-    }
-    var canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-    return new Promise(function (resolve) {
-      canvas.toBlob(
-        function (blob) {
-          if (!blob) {
-            resolve(null);
-            return;
-          }
-          resolve(new File([blob], "frame.jpg", { type: "image/jpeg" }));
-        },
-        "image/jpeg",
-        0.92
-      );
-    });
-  }
-
-  function decodeFile(file) {
-    if (!file) {
-      return Promise.resolve();
-    }
-    if (!scanner) {
-      scanner = new Html5Qrcode("reader", { verbose: false });
-    }
-    locked = true;
-    showWait();
-    return stopScanner()
-      .then(function () {
-        return scanner.scanFile(file, false);
-      })
-      .then(function (text) {
-        identify(text);
-      })
-      .catch(function () {
-        showOverlay("red", "Identifier could not be read.", []);
-      });
-  }
-
-  function forceScan() {
-    if (locked) {
-      return;
-    }
-    frameFile().then(function (file) {
-      if (file) {
-        decodeFile(file);
-        return;
-      }
-      document.getElementById("scanFile").click();
-    });
   }
 
   function identify(text) {
@@ -449,20 +393,11 @@
     applyDebug();
   });
 
-  document.getElementById("forceScan").addEventListener("click", forceScan);
-  document.getElementById("scanFile").addEventListener("change", function (event) {
-    var file = event.target.files && event.target.files[0];
-    event.target.value = "";
-    if (file) {
-      decodeFile(file);
-    }
-  });
-
   document.getElementById("debugOk").addEventListener("click", function () {
-    onScan("MEMBER_106902");
+    onScan("106902");
   });
   document.getElementById("debugBad").addEventListener("click", function () {
-    onScan("MEMBER_000000");
+    onScan("000000");
   });
 
   applyDebug();

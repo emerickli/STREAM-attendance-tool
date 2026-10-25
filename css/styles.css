@@ -229,41 +229,18 @@ body {
   opacity: 1;
 }
 
-.scan-actions {
+.debug-bar[hidden] {
+  display: none;
+}
+
+.debug-bar {
   position: absolute;
   left: 12px;
   right: 12px;
   bottom: 12px;
   z-index: 6;
   display: flex;
-  flex-direction: column;
   gap: 8px;
-}
-
-.debug-bar[hidden] {
-  display: none;
-}
-
-.debug-bar {
-  display: flex;
-  gap: 8px;
-}
-
-.force-scan {
-  min-height: 44px;
-  border: 0;
-  background: var(--navy-3);
-  color: var(--text);
-  font-family: var(--ui);
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  padding: 10px 12px;
-}
-
-.force-scan:focus {
-  outline: none;
-  background: var(--navy-4);
 }
 
 .debug-bar button {

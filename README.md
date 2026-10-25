@@ -21,10 +21,10 @@ Event tabs in the spreadsheet become the dropdown. `Roster` and tabs starting wi
 Prototype member in `js/members.js`:
 
 ```
-MEMBER_106902  Kai Emerick Li  12
+106902  Kai Emerick Li  12
 ```
 
-A test QR should encode only `MEMBER_106902`.
+A test QR should encode only `106902`.
 
 ## GitHub Pages
 
