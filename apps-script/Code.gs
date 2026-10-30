@@ -84,16 +84,29 @@ function checkIn(data) {
     }
   }
   sheet.appendRow([new Date(), name, grade, id]);
+  fitColumns(sheet);
   return { status: "ok" };
 }
 
 function ensureHeaders(sheet) {
   if (sheet.getLastRow() === 0) {
     sheet.appendRow(["Timestamp", "Name", "Grade", "ID"]);
-    return;
+  } else {
+    var first = sheet.getRange(1, 1, 1, 4).getValues()[0];
+    if (!first[0] && !first[1] && !first[2] && !first[3]) {
+      sheet.getRange(1, 1, 1, 4).setValues([["Timestamp", "Name", "Grade", "ID"]]);
+    }
   }
-  var first = sheet.getRange(1, 1, 1, 4).getValues()[0];
-  if (!first[0] && !first[1] && !first[2] && !first[3]) {
-    sheet.getRange(1, 1, 1, 4).setValues([["Timestamp", "Name", "Grade", "ID"]]);
+  sheet.getRange("A:A").setNumberFormat("MM/dd/yyyy h:mm:ss");
+  fitColumns(sheet);
+}
+
+function fitColumns(sheet) {
+  var mins = [200, 260, 160, 120];
+  sheet.autoResizeColumns(1, 4);
+  for (var i = 0; i < mins.length; i++) {
+    if (sheet.getColumnWidth(i + 1) < mins[i]) {
+      sheet.setColumnWidth(i + 1, mins[i]);
+    }
   }
 }

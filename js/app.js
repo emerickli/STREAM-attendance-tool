@@ -232,19 +232,20 @@
       return;
     }
     showWait();
+    var classLabel = "Class of " + member.classOf;
     api({
       action: "checkIn",
       event: select.value,
       id: code,
       name: member.name,
-      grade: member.grade,
+      grade: classLabel,
     })
       .then(function (data) {
         if (data && data.status === "duplicate") {
           showOverlay(
             "navy",
             "Already signed in, " + member.name + ".",
-            ["Grade: " + member.grade],
+            [classLabel],
             true
           );
           return;
@@ -253,7 +254,7 @@
           showOverlay(
             "navy",
             "Welcome back, " + member.name + ".",
-            ["Grade: " + member.grade],
+            [classLabel],
             true
           );
           return;
@@ -265,7 +266,7 @@
           showOverlay(
             "navy",
             "Welcome back, " + member.name + ".",
-            ["Grade: " + member.grade]
+            [classLabel]
           );
           return;
         }
