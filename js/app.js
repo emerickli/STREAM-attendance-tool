@@ -85,10 +85,6 @@
   function fillEvents(events, prefer) {
     var saved = prefer || localStorage.getItem(EVENT_KEY) || "";
     select.innerHTML = "";
-    var blank = document.createElement("option");
-    blank.value = "";
-    blank.textContent = "Event";
-    select.appendChild(blank);
     events.forEach(function (name) {
       var opt = document.createElement("option");
       opt.value = name;
@@ -101,9 +97,14 @@
     select.appendChild(createOpt);
     if (saved && events.indexOf(saved) !== -1) {
       select.value = saved;
+    } else if (events.length) {
+      select.value = events[0];
+    } else {
+      select.value = NEW_EVENT;
     }
-    lastEvent = select.value;
-    if (select.value) {
+    lastEvent = select.value === NEW_EVENT ? "" : select.value;
+    if (lastEvent) {
+      localStorage.setItem(EVENT_KEY, lastEvent);
       startScanner();
     }
   }
